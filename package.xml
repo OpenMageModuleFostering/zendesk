@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+    <name>zendesk</name>
+    <version>1.0.4</version>
+    <stability>stable</stability>
+    <license uri="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Software License v2</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Zendesk helps you deliver the best customer support to your customers.</summary>
+    <description>&lt;strong&gt;Zendesk&lt;/strong&gt; is the market leader of smart, agile and convenient cloud-based customer support software. For growing organizations, Zendesk is the fastest way to enable great customer service.&lt;br /&gt;&lt;br /&gt;&#xD;
+&#xD;
+This extension makes Zendesk work seamlessly with Magento to enable stores to deliver great customer support. &lt;br /&gt;&lt;br /&gt;&#xD;
+&#xD;
+&lt;strong&gt;Features include:&lt;/strong&gt;&lt;br /&gt;&#xD;
+- Enable Single Sign-on with Zendesk&lt;br /&gt;&#xD;
+- Create support tickets without leaving Magento&lt;br /&gt;&#xD;
+- Display relevant support tickets on order &amp; customer dashboards&lt;br /&gt;&#xD;
+- Create support tickets from Contact Us requests&lt;br /&gt;&#xD;
+- Easily add a feedback tab to your site</description>
+    <notes>Initial public release</notes>
+    <authors><author><name>Jason Smale</name><user>zendesk</user><email>jsmale@zendesk.com</email></author><author><name>Fontis</name><user>fontis</user><email>chris.norton@fontis.com.au</email></author></authors>
+    <date>2012-11-07</date>
+    <time>03:51:33</time>
+    <contents><target name="magelocal"><dir/></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.2.0</min><max>6.0.0</max></php></required></dependencies>
+</package>
