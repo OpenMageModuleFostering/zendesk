@@ -24,7 +24,7 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
         return $base_url . '/' . $path;
     }
 
-    protected function _call($endpoint, $params = null, $method = 'GET', $data = null)
+    protected function _call($endpoint, $params = null, $method = 'GET', $data = null, $silent = false, $global = false)
     {
         if($params && is_array($params) && count($params) > 0) {
             $args = array();
@@ -33,7 +33,7 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
             }
             $endpoint .= '?' . implode('&', $args);
         }
-
+        
         $url = $this->_getUrl($endpoint);
 
         $method = strtoupper($method);
@@ -46,12 +46,13 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
                  'Content-Type' => 'application/json'
             )
         );
+
         $client->setAuth(
-            Mage::getStoreConfig('zendesk/general/email') . '/token',
+            Mage::getStoreConfig('zendesk/general/email'). '/token',
             Mage::getStoreConfig('zendesk/general/password')
         );
 
-        if($method == 'POST') {
+        if($method == 'POST' || $method == "PUT") {
             $client->setRawData(json_encode($data), 'application/json');
         }
 
@@ -67,8 +68,13 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
             null,
             'zendesk.log'
         );
-
-        $response = $client->request();
+        
+        try {
+            $response = $client->request();
+        } catch ( Exception $ex ) {
+            return array();
+        }
+        
         $body = json_decode($response->getBody(), true);
 
         Mage::log(var_export($body, true), null, 'zendesk.log');
@@ -76,12 +82,27 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
         if($response->isError()) {
             if(is_array($body) && isset($body['error'])) {
                 if(is_array($body['error']) && isset($body['error']['title'])) {
-                    throw new Exception($body['error']['title'], $response->getStatus());
+                    if (!$silent) {
+                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('zendesk')->__($body['error']['title'],$response->getStatus()));
+                        return;
+                    } else {
+                        return $body;
+                    }
                 } else {
-                    throw new Exception($body['error'], $response->getStatus());
+                    if (!$silent) {
+                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('zendesk')->__($body['error'],$response->getStatus()));
+                        return;
+                    } else {
+                        return $body;
+                    }
                 }
             } else {
-                throw new Exception($body, $response->getStatus());
+                if (!$silent) {
+                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('zendesk')->__($body, $response->getStatus()));
+                    return;
+                } else {
+                    return $body;
+                }
             }
         }
 

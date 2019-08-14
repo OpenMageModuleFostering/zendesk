@@ -25,7 +25,7 @@ class Zendesk_Zendesk_Helper_Data extends Mage_Core_Helper_Abstract
         $root = ($format === 'old') ? '' : '/agent/#';
 
         $base = $protocol . $domain . $root;
-
+       
         switch($object) {
             case '':
                 return $base;
@@ -45,6 +45,88 @@ class Zendesk_Zendesk_Helper_Data extends Mage_Core_Helper_Abstract
         }
     }
 
+    /**
+     * Returns configured Zendesk Domain
+     * format: company.zendesk.com
+     *
+     * @return mixed Zendesk Account Domain
+     */
+    public function getZendeskDomain()
+    {
+        return Mage::getStoreConfig('zendesk/general/domain');
+    }
+    
+    
+    /**
+     * Returns if SSO is enabled for EndUsers
+     * @return integer
+     */
+    public function isSSOEndUsersEnabled()
+    {
+        return Mage::getStoreConfig('zendesk/sso_frontend/enabled');
+    }
+
+    /**
+     * Returns if SSO is enabled for Admin/Agent Users
+     * @return integer
+     */
+    public function isSSOAdminUsersEnabled()
+    {
+        return Mage::getStoreConfig('zendesk/sso/enabled');
+    }
+
+    /**
+     * Returns frontend URL where authentication process starts for EndUsers
+     *
+     * @return string SSO Url to auth EndUsers
+     */
+    public function getSSOAuthUrlEndUsers()
+    {
+        return Mage::getUrl('zendesk/sso/login');
+    }
+
+    /**
+     * Returns backend URL where authentication process starts for Admin/Agents
+     *
+     * @return string SSO Url to auth Admin/Agents
+     */
+    public function getSSOAuthUrlAdminUsers()
+    {
+        return Mage::helper('adminhtml')->getUrl('*/zendesk/login');
+    }
+
+    /**
+     * Returns Zendesk Account Login URL for normal access
+     * format: https://<zendesk_account>/<route>
+     *
+     * @return string Zendesk Account login url
+     */
+    public function getZendeskAuthNormalUrl()
+    {
+        $protocol = 'https://';
+        $domain = $this->getZendeskDomain();
+        $route = '/access/normal';
+
+        return $protocol . $domain . $route;
+    }
+
+    /**
+     * Returns Zendesk Login Form unauthenticated URL
+     * format: https://<zendesk_account>/<route>
+     *
+     * @return string Zendesk Account login unauthenticated form url
+     */
+    public function getZendeskUnauthUrl()
+    {
+        $protocol = 'https://';
+        $domain = $this->getZendeskDomain();
+        //Zendesk will automatically redirect to login if user is not logged in
+        //previous URL followed to login page even if user has already logged in
+        $route = '/home';
+
+        return $protocol . $domain . $route;
+    }
+    
     public function getApiToken($generate = true)
     {
         // Grab any existing token from the admin scope
@@ -109,6 +191,9 @@ class Zendesk_Zendesk_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function getOrderDetail($order)
     {
+        // if the admin site has a custom URL, use it
+        $urlModel = Mage::getModel('adminhtml/url')->setStore('admin');
+
         $orderInfo = array(
             'id' => $order->getIncrementId(),
             'status' => $order->getStatus(),
@@ -124,7 +209,7 @@ class Zendesk_Zendesk_Helper_Data extends Mage_Core_Helper_Abstract
             'total' => $order->getGrandTotal(),
             'currency' => $order->getOrderCurrencyCode(),
             'items' => array(),
-            'admin_url' => Mage::helper('adminhtml')->getUrl('adminhtml/sales_order/view', array('order_id' => $order->getId())),
+            'admin_url' => $urlModel->getUrl('adminhtml/sales_order/view', array('order_id' => $order->getId())),
         );
 
         foreach($order->getItemsCollection(array(), true) as $item) {
@@ -175,4 +260,114 @@ class Zendesk_Zendesk_Helper_Data extends Mage_Core_Helper_Abstract
 
         return $customer;
     }
+
+    /**
+     * Retrieve Use External ID config option
+     *
+     * @return integer
+     */
+    public function isExternalIdEnabled()
+    {
+        return Mage::getStoreConfig('zendesk/general/use_external_id');
+    }
+
+    public function getTicketUrl($row, $link = false)
+    {   
+        $path = Mage::getSingleton('admin/session')->getUser() ? 'adminhtml/zendesk/login' : '*/sso/login';
+        $url = Mage::helper('adminhtml')->getUrl($path, array("return_url" => Mage::helper('core')->urlEncode(Mage::helper('zendesk')->getUrl('ticket', $row['id']))));
+        
+        if ($link)
+            return $url;
+        
+        $subject = $row['subject'] ? $row['subject'] : $this->__('No Subject');
+
+        return '<a href="' . $url . '" target="_blank">' .  Mage::helper('core')->escapeHtml($subject) . '</a>';
+    }
+    
+    public function getStatusMap()
+    {
+        return array(
+            'new'       =>  'New',
+            'open'      =>  'Open',
+            'pending'   =>  'Pending',
+            'solved'    =>  'Solved',
+            'closed'    =>  'Closed',
+            'hold'      =>  'Hold'
+        );
+    }
+        
+    public function getPriorityMap()
+    {
+        return array(
+            'low'       =>  'Low',
+            'normal'    =>  'Normal',
+            'high'      =>  'High',
+            'urgent'    =>  'Urgent'
+        );
+    }
+    
+    public function getTypeMap()
+    {
+        return array(
+            'problem'   =>  'Problem',
+            'incident'  =>  'Incident',
+            'question'  =>  'Question',
+            'task'      =>  'Task'
+        );
+    }
+    
+    public function getChosenViews() {
+        $list = trim(trim(Mage::getStoreConfig('zendesk/backend_features/show_views')), ',');
+        return explode(',', $list);
+    }
+    
+    public function getFormatedDataForAPI($dateToFormat) {
+        $myDateTime = DateTime::createFromFormat('d/m/Y', $dateToFormat);
+        return $myDateTime->format('Y-m-d');
+    }
+    
+    public function isValidDate($date) {
+        if(is_string($date)) {
+            $d = DateTime::createFromFormat('d/m/Y', $date);
+            return $d && $d->format('d/m/Y') == $date;
+        }
+        
+        return false;
+    }
+    
+    public function getFormatedDateTime($dateToFormat) {
+        return Mage::helper('core')->formatDate($dateToFormat, 'medium', true);
+    }
+    
+    public function getConnectionStatus() {
+        try {
+            $user = Mage::getModel('zendesk/api_users')->me();
+            
+            if($user['id']) {
+                return array(
+                    'success'   => true,
+                    'msg'       => Mage::helper('zendesk')->__('Connection to Zendesk API successful'),
+                );
+            }
+            
+            $error = Mage::helper('zendesk')->__('Connection to Zendesk API failed') .
+                '<br />' . Mage::helper('zendesk')->__('Troubleshooting tips can be found at <a href=%s>%s</a>', 'https://support.zendesk.com/entries/26579987', 'https://support.zendesk.com/entries/26579987');
+            
+            return array(
+                'success'   => false,
+                'msg'       => $error,
+            );
+            
+        } catch (Exception $ex) {
+            $error = Mage::helper('zendesk')->__('Connection to Zendesk API failed') .
+                '<br />' . $ex->getCode() . ': ' . $ex->getMessage() .
+                '<br />' . Mage::helper('zendesk')->__('Troubleshooting tips can be found at <a href=%s>%s</a>', 'https://support.zendesk.com/entries/26579987', 'https://support.zendesk.com/entries/26579987');
+            
+            return array(
+                'success'   => false,
+                'msg'       => $error,
+            );
+        }
+    }
+    
 }

@@ -23,14 +23,33 @@ class Zendesk_Zendesk_ApiController extends Mage_Core_Controller_Front_Action
         // Perform some basic checks before running any of the API methods
         // Note that authorisation will accept either the provisioning or the standard API token, which facilitates API
         // methods being called during the setup process
-        $authHeader = $this->getRequest()->getHeader('authorization');
+        $tokenString = $this->getRequest()->getHeader('authorization');
 
-        if (!$authHeader) {
-            Mage::log('Unable to extract authorization header from request', null, 'zendesk.log');
+        if(!$tokenString && isset($_SERVER['Authorization'])) {
+            $tokenString = $_SERVER['Authorization'];
+        }
+
+        if(!$tokenString && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $tokenString = $_SERVER['HTTP_AUTHORIZATION'];
+        }
+        
+        if (!$tokenString && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $tokenString = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        }
+
+        if (!$tokenString) {
+            // Certain server configurations fail to extract headers from the request, see PR #24.
+            Mage::log('Unable to extract authorization header from request.', null, 'zendesk.log');
+
+            $this->getResponse()
+                ->setBody(json_encode(array('success' => false, 'message' => 'Unable to extract authorization header from request')))
+                ->setHttpResponseCode(403)
+                ->setHeader('Content-type', 'application/json', true);
+
             return false;
         }
 
-        $tokenString = stripslashes($authHeader);
+        $tokenString = stripslashes($tokenString);
 
         $token = null;
         $matches = array();
@@ -135,6 +154,9 @@ class Zendesk_Zendesk_ApiController extends Mage_Core_Controller_Front_Action
         // Try to load a corresponding customer object for the provided email address
         $customer = Mage::helper('zendesk')->loadCustomer($email);
 
+        // if the admin site has a custom URL, use it
+        $urlModel = Mage::getModel('adminhtml/url')->setStore('admin');
+
         if($customer && $customer->getId()) {
             $info = array(
                 'guest' => false,
@@ -142,7 +164,7 @@ class Zendesk_Zendesk_ApiController extends Mage_Core_Controller_Front_Action
                 'name' => $customer->getName(),
                 'email' => $customer->getEmail(),
                 'active' => (bool)$customer->getIsActive(),
-                'admin_url' => Mage::helper('adminhtml')->getUrl('adminhtml/zendesk/redirect', array('id' => $customer->getId(), 'type' => 'customer')),
+                'admin_url' => $urlModel->getUrl('adminhtml/zendesk/redirect', array('id' => $customer->getId(), 'type' => 'customer')),
                 'created' => $customer->getCreatedAt(),
                 'dob' => $customer->getDob(),
                 'addresses' => array(),
@@ -290,7 +312,7 @@ class Zendesk_Zendesk_ApiController extends Mage_Core_Controller_Front_Action
         if(!isset($data['order_field_id'])) {
             $missingFields[] = 'order_field_id';
         } else {
-            $configUpdates['zendesk/features/order_field_id'] = $data['order_field_id'];
+            $configUpdates['zendesk/frontend_features/order_field_id'] = $data['order_field_id'];
         }
 
         // Check that the required fields were provided and send back an error if not
@@ -321,15 +343,15 @@ class Zendesk_Zendesk_ApiController extends Mage_Core_Controller_Front_Action
         }
 
         if(isset($data['magento_footer_link'])) {
-            $configUpdates['zendesk/features/footer_link_enabled'] = ($data['magento_footer_link'] == 'true');
+            $configUpdates['zendesk/frontend_features/footer_link_enabled'] = ($data['magento_footer_link'] == 'true');
         }
 
         if(isset($data['email_forwarding'])) {
-            $configUpdates['zendesk/features/contact_us'] = ($data['email_forwarding'] == 'true');
+            $configUpdates['zendesk/frontend_features/contact_us'] = ($data['email_forwarding'] == 'true');
 
             // Process this now, since it otherwise won't be triggered until the config page is saved
             // Unlike in the observer, we only need to deal with the case where the setting is enabled
-            if($configUpdates['zendesk/features/contact_us']) {
+            if($configUpdates['zendesk/frontend_features/contact_us']) {
 
                 $currentEmail = Mage::getStoreConfig('contacts/email/recipient_email');
                 $zendeskEmail = 'support@' . $configUpdates['zendesk/general/domain'];
@@ -346,11 +368,11 @@ class Zendesk_Zendesk_ApiController extends Mage_Core_Controller_Front_Action
         }
 
         if(isset($data['feedback_tab'])) {
-            $configUpdates['zendesk/features/feedback_tab_code_active'] = ($data['feedback_tab'] === 'true');
+            $configUpdates['zendesk/frontend_features/feedback_tab_code_active'] = ($data['feedback_tab'] === 'true');
         }
 
         if(isset($data['feedback_tab_html'])) {
-            $configUpdates['zendesk/features/feedback_tab_code'] = $data['feedback_tab_html'];
+            $configUpdates['zendesk/frontend_features/feedback_tab_code'] = $data['feedback_tab_html'];
         }
 
 
