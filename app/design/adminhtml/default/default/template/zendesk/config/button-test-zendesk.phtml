@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2012 Zendesk.
+ * Copyright 2013 Zendesk.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-class Zendesk_Zendesk_Block_Adminhtml_Menu extends Mage_Adminhtml_Block_Template
-{
-    public function __construct()
-    {
-        parent::__construct();
-        $this->setId('page_tabs');
-        $this->setTemplate('zendesk/left-menu.phtml');
-    }
-
-    public function isAllowed($target)
-    {
-        try {
-            return Mage::getSingleton('admin/session')->isAllowed('admin/zendesk/zendesk_' . $target);
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-}
+?>
+<button style="" onclick="setLocation('<?php echo $this->getUrl('adminhtml/zendesk/checkOutbound'); ?>');" class="scalable" type="button" id="<?php echo $this->getHtmlId() ?>">
+    <span><?php echo $this->escapeHtml($this->getButtonLabel()) ?></span>
+</button>

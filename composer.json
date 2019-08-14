@@ -1,9 +1,9 @@
 {
     "name": "OpenMageModuleFostering/zendesk",
     "type": "magento-module",
-    "license": "Apache-Software-License-v2",
+    "license": "Apache-License,-Version-2.0",
     "homepage": "",
-    "description": "Zendesk helps deliver the best customer support to your customers.",
+    "description": "Zendesk helps you deliver the best customer support to your customers.",
     "authors": [
     {
         "name": "Jason Smale",

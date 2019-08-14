@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2012 Zendesk.
+ * Copyright 2013 Zendesk.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,17 @@
  * limitations under the License.
  */
 
-class Zendesk_Zendesk_Block_Adminhtml_Menu extends Mage_Adminhtml_Block_Template
+class Zendesk_Zendesk_Block_Adminhtml_Log extends Mage_Adminhtml_Block_Template
 {
+
     public function __construct()
     {
         parent::__construct();
-        $this->setId('page_tabs');
-        $this->setTemplate('zendesk/left-menu.phtml');
+        $this->setTemplate('zendesk/log/index.phtml');
     }
 
-    public function isAllowed($target)
+    public function getLogContents()
     {
-        try {
-            return Mage::getSingleton('admin/session')->isAllowed('admin/zendesk/zendesk_' . $target);
-        } catch (Exception $e) {
-            return false;
-        }
+        return Mage::helper('zendesk/log')->getLogContents();
     }
 }
