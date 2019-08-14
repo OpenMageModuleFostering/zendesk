@@ -252,10 +252,11 @@ class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Control
 
     public function launchAction()
     {
-        $domain = $this->_domainConfigured();
-        if (!$domain) {
+        if (!$this->_domainConfigured()) {
             return;
         }
+
+        $domain = Mage::getStoreConfig('zendesk/general/domain');
 
         $sso = Mage::getStoreConfig('zendesk/sso/enabled');
 
@@ -340,11 +341,18 @@ class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Control
             }
 
             try {
-                $admin = Mage::getModel('zendesk/api_users')->me();
+                $admin = Mage::getSingleton('admin/session')->getUser();
+                $submitter = Mage::getModel('zendesk/api_users')->find($admin->getEmail());
+
+                if (!$submitter) {
+                    // Default to the user set in the agent email field under Configuration
+                    $submitter = Mage::getModel('zendesk/api_users')->me();
+                }
+
                 $ticket = array(
                     'ticket' => array(
                         'requester_id' => $requesterId,
-                        'submitter_id' => $admin['id'],
+                        'submitter_id' => $submitter['id'],
                         'subject' => $data['subject'],
                         'status' => $data['status'],
                         'priority' => $data['priority'],
@@ -526,7 +534,9 @@ class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Control
         $this->getResponse()->clearHeaders()->setHeader('Content-type','application/json',true);
         Mage::log('Synchronization started', null, 'zendesk.log');
         try {
-            $user = Mage::getModel('zendesk/api_users')->all();
+            $userFieldKeys = array_column(Mage::getModel('zendesk/api_users')->getUserFields(), 'key');
+            $user = Mage::getModel('zendesk/api_users')->me();
+
             if (is_null($user))
                 throw new Exception("Connection Failed");
 
@@ -593,7 +603,11 @@ class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Control
             );
 
             foreach($data as $field) {
+                if (in_array($field['user_field']['key'], $userFieldKeys))
+                    continue;
+
                 $response = Mage::getModel('zendesk/api_users')->createUserField($field);
+
                 if (!isset($response['active']) || $response['active'] === false)
                     Mage::log('Unable to create User Field with key '.$field['user_field']['key'], null, 'zendesk.log');
             }
@@ -749,13 +763,12 @@ class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Control
 
     private function _domainConfigured()
     {
-        $domain = Mage::getStoreConfig('zendesk/general/domain');
-        if(!$domain) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('zendesk')->__('Please set up Zendesk connection.'));
+        if (!Mage::helper('zendesk')->isConnected()) {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('zendesk')->__('Please set up a Zendesk connection.'));
             $this->_redirect('adminhtml/dashboard');
             return false;
         } else {
-            return $domain;
+            return true;
         }
     }
 
