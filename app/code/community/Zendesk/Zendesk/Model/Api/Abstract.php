@@ -17,9 +17,70 @@
 
 class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
 {
+    protected $username = null;
+    protected $password = null;
+    protected $domain = null;
+
+    /**
+     * Sets the domain to be used for this instance
+     * 
+     * @param string $username The user domain
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+    }
+
+    /**
+     * Sets the email to be used for this instance
+     * 
+     * @param string $username The user email
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+    }
+
+    /**
+     * Sets the API token for this instance
+     * 
+     * @param string $password The API token
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+    }
+
+    public function getUsername()
+    {
+        if ($this->username === null) {
+            $this->username = Mage::getStoreConfig('zendesk/general/email');
+        }
+
+        return $this->username . '/token';
+    }
+
+    public function getPassword()
+    {
+        if ($this->password === null) {
+            $this->password = Mage::getStoreConfig('zendesk/general/password');
+        }
+
+        return $this->password; 
+    }
+
+    public function getDomain()
+    {
+        if ($this->domain === null) {
+            $this->domain = Mage::getStoreConfig('zendesk/general/domain');
+        }
+
+        return $this->domain; 
+    }
+
     protected function _getUrl($path)
     {
-        $base_url = 'https://' . Mage::getStoreConfig('zendesk/general/domain') . '/api/v2';
+        $base_url = 'https://' . $this->getDomain() . '/api/v2';
         $path = trim($path, '/');
         return $base_url . '/' . $path;
     }
@@ -33,7 +94,7 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
             }
             $endpoint .= '?' . implode('&', $args);
         }
-        
+
         $url = $this->_getUrl($endpoint);
 
         $method = strtoupper($method);
@@ -48,8 +109,8 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
         );
 
         $client->setAuth(
-            Mage::getStoreConfig('zendesk/general/email'). '/token',
-            Mage::getStoreConfig('zendesk/general/password')
+            $this->getUsername(),
+            $this->getPassword()
         );
 
         if($method == 'POST' || $method == "PUT") {
@@ -68,16 +129,20 @@ class Zendesk_Zendesk_Model_Api_Abstract extends Mage_Core_Model_Abstract
             null,
             'zendesk.log'
         );
-        
+
         try {
             $response = $client->request();
-        } catch ( Exception $ex ) {
+        } catch ( Zend_Http_Client_Exception $ex ) {
+            Mage::log('Call to ' . $url . ' resulted in: ' . $ex->getMessage(), Zend_Log::ERR, 'zendesk.log');
+            Mage::log('--Last Request: ' . $client->getLastRequest(), Zend_Log::ERR, 'zendesk.log');
+            Mage::log('--Last Response: ' . $client->getLastResponse(), Zend_Log::ERR, 'zendesk.log');
+
             return array();
         }
-        
+
         $body = json_decode($response->getBody(), true);
 
-        Mage::log(var_export($body, true), null, 'zendesk.log');
+        Mage::log(var_export($body, true), Zend_Log::DEBUG, 'zendesk.log');
 
         if($response->isError()) {
             if(is_array($body) && isset($body['error'])) {
