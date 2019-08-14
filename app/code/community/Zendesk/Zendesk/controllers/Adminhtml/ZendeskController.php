@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+require_once( Mage::getModuleDir('base'). 'community/Zendesk/Zendesk/Helper/JWT.php');
+
 class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Controller_Action
 {
     protected $_publicActions = array('redirect', 'authenticate');
@@ -75,16 +77,29 @@ class Zendesk_Zendesk_Adminhtml_ZendeskController extends Mage_Adminhtml_Control
             $this->_redirect(Mage::getSingleton('admin/session')->getUser()->getStartupPageUrl());
         }
 
+        $now = time();
+        $jti = md5($now . rand());
+
         $user = Mage::getSingleton('admin/session')->getUser();
         $name = $user->getName();
         $email = $user->getEmail();
         $externalId = $user->getId();
 
-        $timestamp = $this->getRequest()->getParam('timestamp', time());
-        $message = $name.$email.$externalId.$token.$timestamp;
-        $hash = md5($message);
+        $payload = array(
+          "iat" => $now,
+          "jti" => $jti,
+          "name" => $name,
+          "email" => $email,
+          "external_id" => $externalId
+        );
 
-        $url = "http://".$domain."/access/remote/?name=".$name."&email=".$email."&external_id=".$externalId."&timestamp=".$timestamp."&hash=".$hash;
+        Mage::log(var_export($payload, true), null, 'zendesk.log');
+
+        $jwt = JWT::encode($payload, $token);
+
+        $url = "http://".$domain."/access/jwt?jwt=" . $jwt;
+
+        Mage::log(var_export($url, true), null, 'zendesk.log');
 
         $this->_redirectUrl($url);
     }
