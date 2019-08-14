@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
     <name>zendesk</name>
-    <version>1.0.4</version>
+    <version>1.1.0</version>
     <stability>stable</stability>
     <license uri="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Software License v2</license>
     <channel>community</channel>
     <extends/>
-    <summary>Zendesk helps you deliver the best customer support to your customers.</summary>
+    <summary>Zendesk helps deliver the best customer support to your customers.</summary>
     <description>&lt;strong&gt;Zendesk&lt;/strong&gt; is the market leader of smart, agile and convenient cloud-based customer support software. For growing organizations, Zendesk is the fastest way to enable great customer service.&lt;br /&gt;&lt;br /&gt;&#xD;
 &#xD;
 This extension makes Zendesk work seamlessly with Magento to enable stores to deliver great customer support. &lt;br /&gt;&lt;br /&gt;&#xD;
@@ -17,11 +17,11 @@ This extension makes Zendesk work seamlessly with Magento to enable stores to de
 - Display relevant support tickets on order &amp; customer dashboards&lt;br /&gt;&#xD;
 - Create support tickets from Contact Us requests&lt;br /&gt;&#xD;
 - Easily add a feedback tab to your site</description>
-    <notes>Initial public release</notes>
-    <authors><author><name>Jason Smale</name><user>zendesk</user><email>jsmale@zendesk.com</email></author><author><name>Fontis</name><user>fontis</user><email>chris.norton@fontis.com.au</email></author></authors>
-    <date>2012-11-07</date>
-    <time>03:51:33</time>
-    <contents><target name="magelocal"><dir/></target></contents>
+    <notes>First release of the Zendesk extension.</notes>
+    <authors><author><name>Jason Smale</name><user>zendesk</user><email>jsmale@zendesk.com</email></author><author><name>Fontis</name><user>fontis</user><email>magento@fontis.com.au</email></author></authors>
+    <date>2012-11-11</date>
+    <time>22:07:57</time>
+    <contents><target name="mageetc"><dir name="modules"><file name="Zendesk_Zendesk.xml" hash="7edb55f3349e4ad2ff74c2fb6568b6f5"/></dir></target><target name="magecommunity"><dir name="Zendesk"><dir name="Zendesk"><dir name="Block"><dir name="Adminhtml"><dir name="Config"><dir name="Buttons"><file name="Generate.php" hash="e8e6cfed55f6b4f0545fb4e4e6910e8c"/><file name="Signup.php" hash="590cfac588241092a435aacff891fe00"/></dir><file name="Link.php" hash="31f933cbc1fef82be811d1b18f3c1ea8"/></dir><dir name="Create"><dir name="Edit"><file name="Form.php" hash="6efa3803bd7dadc849c6eb4c24b6f348"/></dir><file name="Edit.php" hash="2f745c92d8ae989d8efca07a4eb8c882"/></dir><dir name="Dashboard"><file name="Grids.php" hash="d0fcd44587dd5638f9b30c448b9401b1"/><dir name="Tab"><file name="View.php" hash="de6b1fbec6586ecf622425e819dd8630"/></dir></dir><file name="Dashboard.php" hash="dc4f3431ddaf57bedbb637e83861a8ed"/><file name="Menu.php" hash="29818e0fe101898350ca1ff93c1848a2"/><dir name="Order"><dir name="View"><file name="Tickets.php" hash="f4de4b62bff9957082cb65a9de020943"/></dir><file name="View.php" hash="791482c44b3d3ee806ab50c2ded76a76"/></dir></dir><file name="Supporttab.php" hash="7b9185784e85db83e7b98b32151ac5bd"/></dir><dir name="Helper"><file name="Data.php" hash="ee52defa6894b7917f19063111d66a1b"/></dir><file name="LICENSE.txt" hash="5e5e84085e3a6622e82e7a9f4c52e6a3"/><dir name="Model"><dir name="Api"><file name="Abstract.php" hash="60c89bbba3b8c91adf43d674222935b0"/><file name="Requesters.php" hash="b77b4a68e1a4069afd636b3e5eb9c65d"/><file name="Tickets.php" hash="b9c3128bc55c8dadd058f9d177ba47ba"/><file name="Users.php" hash="d9ba554ea11442e64786551b44eeda66"/><file name="Views.php" hash="b24bf7e1654b011c75eea6d573f225e3"/></dir><file name="Observer.php" hash="f588fb73fee556e265651c2fe0b9f806"/><dir name="Source"><file name="Views.php" hash="cff74c9b29385a50a7fbb0fd09ed3daf"/></dir></dir><dir name="controllers"><dir name="Adminhtml"><file name="ZendeskController.php" hash="133f1d13aa824b95ae7df8a4e61d6aa4"/></dir><file name="ApiController.php" hash="7465549ed63309b58ff808cd38de50c8"/><file name="IndexController.php" hash="95682b48e725b4b054b582566b6ab68a"/></dir><dir name="etc"><file name="config.xml" hash="79b9b29ac866d40468f1a406de032714"/><file name="system.xml" hash="52da171c98cf741a3246e5b0f798016e"/></dir></dir></dir></target><target name="magelocale"><dir name="en_US"><file name="Zendesk_Zendesk.csv" hash="8a3919a780456de3d5550b38a68dec51"/></dir></target><target name="magedesign"><dir name="adminhtml"><dir name="default"><dir name="default"><dir name="layout"><file name="zendesk.xml" hash="6b5e0f59c6c713b8e94bdd1281fc0743"/></dir><dir name="template"><dir name="zendesk"><dir name="config"><file name="button-generate.phtml" hash="7f3e2e207a81cb7e092507e7f6d526ae"/><file name="button-signup.phtml" hash="da45deac5d41c4f2abf5949515096e78"/><file name="link.phtml" hash="7acc00626ef529dc7c2b41861df438bb"/></dir><dir name="customer"><file name="tickets.phtml" hash="edd373911462b97554bda5aba1bd7a3a"/></dir><dir name="dashboard"><file name="empty.phtml" hash="bc46759dee9d291b8750dfd09e6dba74"/><file name="index.phtml" hash="9f2a75fcde8fdbecdff20ff8b7340a88"/><dir name="tabs"><file name="view.phtml" hash="2cb78499b250f9bf2d104daa5fc0f8d1"/></dir></dir><file name="left-menu.phtml" hash="78d5d8e32647c024d73287896f84df5d"/><dir name="order"><file name="tickets.phtml" hash="efe1c9582779b8bb5a6a182c9106d88d"/></dir></dir></dir></dir></dir></dir><dir name="frontend"><dir name="base"><dir name="default"><dir name="layout"><file name="zendesk.xml" hash="0a007796a9f0eab36279a7c19957cb59"/></dir></dir></dir></dir></target><target name="mageskin"><dir name="adminhtml"><dir name="default"><dir name="default"><dir name="zendesk"><file name="button.png" hash="58e62edb7f4be46e3b29c0bb774c7ad7"/><file name="icon.png" hash="b5bfce535c987d1e9e604823ac4b3943"/><file name="zendesk-tab.png" hash="0f322d15c392528c212d6491732bc133"/><file name="zendesk.css" hash="454aaabc787598a2ee2db5dd48f8ed96"/></dir></dir></dir></dir></target></contents>
     <compatible/>
     <dependencies><required><php><min>5.2.0</min><max>6.0.0</max></php></required></dependencies>
 </package>
