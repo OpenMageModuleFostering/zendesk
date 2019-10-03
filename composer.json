@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Zendesk",
+    "name": "OpenMageModuleFostering\/Zendesk",
     "type": "magento-module",
     "license": "Apache-Software-License",
     "homepage": "",
     "description": "Zendesk helps deliver the best customer support to your customers.",
     "authors": [
-    {
-        "name": "Zendesk",
-        "email": "dev.manila@zendesk.com"
-    }
-],
+        {
+            "name": "Zendesk",
+            "email": "dev.manila@zendesk.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
